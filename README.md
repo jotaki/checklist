@@ -17,4 +17,4 @@ A very simple checklist application
 # TODO
 * * *
 
- * Save/Load support.
+ * Add a timer/reminder list option?
