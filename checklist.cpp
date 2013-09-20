@@ -7,6 +7,7 @@ FXDEFMAP(Checklist) ChecklistMap[] = {
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_EDITITEM, Checklist::editItem),
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_OPENFILE, Checklist::openChecklist),
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_SAVEFILE, Checklist::saveChecklist),
+  FXMAPFUNC(SEL_COMMAND, Checklist::ID_QUIT, Checklist::quitApp),
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_MARKCOMPLETE,
 		  Checklist::markItemComplete),
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_MARKINCOMPLETE,
@@ -38,6 +39,8 @@ Checklist::Checklist(FXApp *app) :
 	openIcon = new FXPNGIcon(getApp(), openckl);
 	saveIcon = new FXPNGIcon(getApp(), saveckl);
 
+	stateChanged = false;
+
 	setIcon(completeIcon);
 
 	new FXMenuCommand(filemenu, "&Open\tCtrl-O",
@@ -45,7 +48,7 @@ Checklist::Checklist(FXApp *app) :
 	new FXMenuCommand(filemenu, "&Save\tCtrl-S",
 			saveIcon, this, Checklist::ID_SAVEFILE);
 	new FXMenuCommand(filemenu, "&Quit\tCtrl-Q",
-			quitchecklistIcon, getApp(), FXApp::ID_QUIT);
+			quitchecklistIcon, this, Checklist::ID_QUIT);
 	new FXMenuCommand(editmenu, "&New\tCtrl-N",
 			newlistIcon, this, Checklist::ID_NEWITEM);
 	new FXMenuCommand(editmenu, "Mark as &Completed\tCtrl-C",
@@ -86,6 +89,7 @@ long Checklist::addNewItem(FXObject*, FXSelector, void*)
 	if(FXInputDialog::getString(item, this, "Check List",
 			"Add New Checklist Item")) {
 		list->appendItem(item.text(), incompleteIcon, (void*)(FXival)0);
+		stateChanged = true;
 	}
 	return 1;
 }
@@ -102,6 +106,7 @@ long Checklist::markItemComplete(FXObject*, FXSelector, void*)
 	if(item >= 0) {
 		list->setItemIcon(item, completeIcon);
 		list->setItemData(item, (void*)(FXival)1);
+		stateChanged = true;
 	}
 	return 1;
 }
@@ -112,6 +117,7 @@ long Checklist::markItemIncomplete(FXObject*, FXSelector, void*)
 	if(item >= 0) {
 		list->setItemIcon(item, incompleteIcon);
 		list->setItemData(item, (void*)(FXival)0);
+		stateChanged = true;
 	}
 	return 1;
 }
@@ -142,6 +148,7 @@ long Checklist::editItem(FXObject*, FXSelector, void*)
 	if(FXInputDialog::getString(item, this, "Check List",
 			"Edit Checklist Item")) {
 		list->setItemText(item_i, item.text());
+		stateChanged = true;
 	}
 
 	return 1;
@@ -153,13 +160,23 @@ long Checklist::openChecklist(FXObject*, FXSelector, void*)
 	FXString path, item;
 	FXFileStream stream;
 	FXchar type, tmp, checked;
+
+	if(stateChanged && !removeData())
+		return 1;
 	
 	path = FXFileDialog::getOpenFilename(this, "Open Checklist", "",
 			"Checklist File (*.ckl)");
 
-	list->clearItems();
+	if(path.empty())
+		return 1;
 
-	stream.open(path);
+	if(!stream.open(path)) {
+		FXMessageBox::error(this, MBOX_OK, "Error",
+				"Could not open ``%s'' for read", path.text());
+		return 1;
+	}
+
+	list->clearItems();
 	while(!stream.eof()) {
 		stream >> type;
 		stream >> checked;
@@ -179,6 +196,7 @@ long Checklist::openChecklist(FXObject*, FXSelector, void*)
 		}
 	}
 	stream.close();
+	stateChanged = false;
 
 	return 1;
 }
@@ -187,11 +205,30 @@ long Checklist::saveChecklist(FXObject*, FXSelector, void*)
 {
 	FXString path, str;
 	FXFileStream stream;
+	FXuint result;
 	int i;
 
 	path = FXFileDialog::getSaveFilename(this, "Save Checklist", "",
 			"Checklist File (*.ckl)");
-	stream.open(path, FXStreamSave);
+
+	if(path.empty())
+		return 1;
+
+	if(FXStat::exists(path)) {
+		result = FXMessageBox::question(this, MBOX_YES_NO,
+				"File exists", "Are you sure you want to "
+				"overwrite ``%s''?", path.text());
+		if(result == MBOX_CLICKED_NO)
+			return 1;
+	}
+
+	if(!stream.open(path, FXStreamSave)) {
+		FXMessageBox::error(this, MBOX_OK, "Could not save",
+			"The file ``%s'' does not appear writable.",
+			path.text());
+		return 1;
+	}
+
 	for(i = 0; i < list->getNumItems(); ++i) {
 		stream << 'C';
 		stream << (FXchar) ((FXival)list->getItemData(i) + '0');
@@ -201,6 +238,26 @@ long Checklist::saveChecklist(FXObject*, FXSelector, void*)
 		stream << '\n';
 	}
 	stream.close();
+	stateChanged = false;
+
+	return 1;
+}
+
+bool Checklist::removeData()
+{
+	FXuint result;
+
+	result = FXMessageBox::question(this, MBOX_YES_NO, "Are you sure?",
+		"The contents of this Checklist have changed, are you sure "
+		"you want to continue this action?");
+
+	return result == MBOX_CLICKED_YES;
+}
+
+long Checklist::quitApp(FXObject*, FXSelector, void*)
+{
+	if(!stateChanged || (stateChanged && removeData()))
+		getApp()->exit();
 
 	return 1;
 }

@@ -21,12 +21,14 @@ public:
 		ID_EDITITEM,
 		ID_OPENFILE,
 		ID_SAVEFILE,
+		ID_QUIT,
 
 		ID_LAST
 	};
 
 protected:
 	Checklist() {}
+	bool removeData();
 
 private:
 	FXMenuBar *menubar;
@@ -37,6 +39,7 @@ private:
 		  *edititemIcon, *markcompleteIcon,
 		  *markincompleteIcon, *quitchecklistIcon,
 		  *openIcon, *saveIcon;
+	bool stateChanged;
 
 public:
 	long addNewItem(FXObject*, FXSelector, void*);
@@ -47,6 +50,7 @@ public:
 	long editItem(FXObject*, FXSelector, void*);
 	long openChecklist(FXObject*, FXSelector, void*);
 	long saveChecklist(FXObject*, FXSelector, void*);
+	long quitApp(FXObject*, FXSelector, void*);
 };
 
 #endif	/* !CHECKLIST_H_ */
