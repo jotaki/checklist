@@ -12,7 +12,7 @@ A very simple checklist application
 # Building
 * * *
 
-```make```
+ * ```make```
 
 # TODO
 * * *
