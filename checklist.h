@@ -19,6 +19,8 @@ public:
 		ID_MARKINCOMPLETE,
 		ID_MAINLIST,
 		ID_EDITITEM,
+		ID_OPENFILE,
+		ID_SAVEFILE,
 
 		ID_LAST
 	};
@@ -33,7 +35,8 @@ private:
 	FXPNGIcon *completeIcon, *incompleteIcon,
 		  *newlistIcon, *clearlistIcon,
 		  *edititemIcon, *markcompleteIcon,
-		  *markincompleteIcon, *quitchecklistIcon;
+		  *markincompleteIcon, *quitchecklistIcon,
+		  *openIcon, *saveIcon;
 
 public:
 	long addNewItem(FXObject*, FXSelector, void*);
@@ -42,6 +45,8 @@ public:
 	long markItemIncomplete(FXObject*, FXSelector, void*);
 	long toggleItem(FXObject*, FXSelector, void*);
 	long editItem(FXObject*, FXSelector, void*);
+	long openChecklist(FXObject*, FXSelector, void*);
+	long saveChecklist(FXObject*, FXSelector, void*);
 };
 
 #endif	/* !CHECKLIST_H_ */

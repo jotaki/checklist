@@ -5,6 +5,8 @@ FXDEFMAP(Checklist) ChecklistMap[] = {
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_NEWITEM, Checklist::addNewItem),
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_CLEARLIST, Checklist::clearItems),
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_EDITITEM, Checklist::editItem),
+  FXMAPFUNC(SEL_COMMAND, Checklist::ID_OPENFILE, Checklist::openChecklist),
+  FXMAPFUNC(SEL_COMMAND, Checklist::ID_SAVEFILE, Checklist::saveChecklist),
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_MARKCOMPLETE,
 		  Checklist::markItemComplete),
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_MARKINCOMPLETE,
@@ -33,11 +35,15 @@ Checklist::Checklist(FXApp *app) :
 	clearlistIcon = new FXPNGIcon(getApp(), clearlist);
 	edititemIcon = new FXPNGIcon(getApp(), edititem);
 	quitchecklistIcon = new FXPNGIcon(getApp(), quitchecklist);
+	openIcon = new FXPNGIcon(getApp(), openckl);
+	saveIcon = new FXPNGIcon(getApp(), saveckl);
 
 	setIcon(completeIcon);
 
-	/*new FXMenuCommand(filemenu, "&Open\tCtrl-O");
-	new FXMenuCommand(filemenu, "&Save\tCtrl-S");*/
+	new FXMenuCommand(filemenu, "&Open\tCtrl-O",
+			openIcon, this, Checklist::ID_OPENFILE);
+	new FXMenuCommand(filemenu, "&Save\tCtrl-S",
+			saveIcon, this, Checklist::ID_SAVEFILE);
 	new FXMenuCommand(filemenu, "&Quit\tCtrl-Q",
 			quitchecklistIcon, getApp(), FXApp::ID_QUIT);
 	new FXMenuCommand(editmenu, "&New\tCtrl-N",
@@ -79,7 +85,7 @@ long Checklist::addNewItem(FXObject*, FXSelector, void*)
 
 	if(FXInputDialog::getString(item, this, "Check List",
 			"Add New Checklist Item")) {
-		list->appendItem(item, incompleteIcon, (void*)0);
+		list->appendItem(item.text(), incompleteIcon, (void*)(FXival)0);
 	}
 	return 1;
 }
@@ -95,7 +101,7 @@ long Checklist::markItemComplete(FXObject*, FXSelector, void*)
 	int item = list->getCurrentItem();
 	if(item >= 0) {
 		list->setItemIcon(item, completeIcon);
-		list->setItemData(item, (void*)1);
+		list->setItemData(item, (void*)(FXival)1);
 	}
 	return 1;
 }
@@ -105,7 +111,7 @@ long Checklist::markItemIncomplete(FXObject*, FXSelector, void*)
 	int item = list->getCurrentItem();
 	if(item >= 0) {
 		list->setItemIcon(item, incompleteIcon);
-		list->setItemData(item, (void*)0);
+		list->setItemData(item, (void*)(FXival)0);
 	}
 	return 1;
 }
@@ -135,8 +141,66 @@ long Checklist::editItem(FXObject*, FXSelector, void*)
 	item = list->getItemText(item_i);
 	if(FXInputDialog::getString(item, this, "Check List",
 			"Edit Checklist Item")) {
-		list->setItemText(item_i, item);
+		list->setItemText(item_i, item.text());
 	}
+
+	return 1;
+}
+
+/* YICK */
+long Checklist::openChecklist(FXObject*, FXSelector, void*)
+{
+	FXString path, item;
+	FXFileStream stream;
+	FXchar type, tmp, checked;
+	
+	path = FXFileDialog::getOpenFilename(this, "Open Checklist", "",
+			"Checklist File (*.ckl)");
+
+	list->clearItems();
+
+	stream.open(path);
+	while(!stream.eof()) {
+		stream >> type;
+		stream >> checked;
+		checked -= '0';
+		item = "";
+		do {
+			stream >> tmp;
+			if(tmp == '\n')
+				break;
+			item.append(tmp);
+		} while(!stream.eof());
+
+		if(!item.empty()) {
+			list->appendItem(item, checked?
+					completeIcon : incompleteIcon,
+					(void*)(FXival) checked);
+		}
+	}
+	stream.close();
+
+	return 1;
+}
+
+long Checklist::saveChecklist(FXObject*, FXSelector, void*)
+{
+	FXString path, str;
+	FXFileStream stream;
+	int i;
+
+	path = FXFileDialog::getSaveFilename(this, "Save Checklist", "",
+			"Checklist File (*.ckl)");
+	stream.open(path, FXStreamSave);
+	for(i = 0; i < list->getNumItems(); ++i) {
+		stream << 'C';
+		stream << (FXchar) ((FXival)list->getItemData(i) + '0');
+
+		str = list->getItemText(i);
+		stream.save(str.text(), str.length());
+		stream << '\n';
+	}
+	stream.close();
 
 	return 1;
 }
