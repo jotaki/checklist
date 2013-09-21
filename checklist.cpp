@@ -28,14 +28,6 @@ Checklist::Checklist(FXApp *app) :
 	tab = new FXTabBook(this, NULL, 0, TABBOOK_BOTTOMTABS |
 			LAYOUT_FILL_X | LAYOUT_FILL_Y);
 
-	new FXTabItem(tab, "Checklist");
-	checklist = new FXList(tab, this, ID_MAINLIST,
-			LAYOUT_FILL_Y | LAYOUT_FILL_X);
-
-	new FXTabItem(tab, "Reminders");
-	reminderlist = new FXList(tab, this, ID_REMINDERLIST,
-			LAYOUT_FILL_Y | LAYOUT_FILL_X);
-
 	completeIcon = new FXPNGIcon(getApp(), complete);
 	markcompleteIcon = new FXPNGIcon(getApp(), markcomplete);
 	incompleteIcon = new FXPNGIcon(getApp(), incomplete);
@@ -46,10 +38,23 @@ Checklist::Checklist(FXApp *app) :
 	quitchecklistIcon = new FXPNGIcon(getApp(), quitchecklist);
 	openIcon = new FXPNGIcon(getApp(), openckl);
 	saveIcon = new FXPNGIcon(getApp(), saveckl);
+	mainIcon = new FXPNGIcon(getApp(), mainicon);
+	mainIconSm = new FXPNGIcon(getApp(), mainiconsm);
+	reminderIcon = new FXPNGIcon(getApp(), remindericon);
+	newreminderIcon = new FXPNGIcon(getApp(), newreminder);
+
+	new FXTabItem(tab, "Checklist", markcompleteIcon);
+	checklist = new FXList(tab, this, ID_MAINLIST,
+			LAYOUT_FILL_Y | LAYOUT_FILL_X);
+
+	new FXTabItem(tab, "Reminders", reminderIcon);
+	reminderlist = new FXList(tab, this, ID_REMINDERLIST,
+			LAYOUT_FILL_Y | LAYOUT_FILL_X);
 
 	stateChanged = false;
 
-	setIcon(completeIcon);
+	setIcon(mainIcon);
+	setMiniIcon(mainIconSm);
 
 	new FXMenuCommand(filemenu, "&Open\tCtrl-O",
 			openIcon, this, Checklist::ID_OPENFILE);
@@ -70,7 +75,7 @@ Checklist::Checklist(FXApp *app) :
 			edititemIcon, this, Checklist::ID_EDITITEM);
 
 	new FXMenuCommand(remindermenu, "New &Reminder\tCtrl-R",
-			NULL, this, Checklist::ID_NEWREMINDER);
+			newreminderIcon, this, Checklist::ID_NEWREMINDER);
 
 	new FXMenuTitle(menubar, "&File", NULL, filemenu);
 	new FXMenuTitle(menubar, "&Checklist", NULL, checklistmenu);
@@ -80,10 +85,28 @@ Checklist::Checklist(FXApp *app) :
 Checklist::~Checklist()
 {
 	delete checklistmenu;
+	delete remindermenu;
 	delete filemenu;
 	delete menubar;
+
 	delete completeIcon;
 	delete incompleteIcon;
+	delete newlistIcon;
+	delete clearlistIcon;
+	delete edititemIcon;
+	delete markcompleteIcon;
+	delete markincompleteIcon;
+	delete quitchecklistIcon;
+	delete openIcon;
+	delete saveIcon;
+	delete mainIcon;
+	delete mainIconSm;
+	delete reminderIcon;
+	delete newreminderIcon;
+
+	delete checklist;
+	delete reminderlist;
+	delete tab;
 }
 
 void Checklist::create()

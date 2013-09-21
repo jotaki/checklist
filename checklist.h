@@ -41,7 +41,8 @@ private:
 		  *newlistIcon, *clearlistIcon,
 		  *edititemIcon, *markcompleteIcon,
 		  *markincompleteIcon, *quitchecklistIcon,
-		  *openIcon, *saveIcon;
+		  *openIcon, *saveIcon, *mainIcon, *mainIconSm,
+		  *reminderIcon, *newreminderIcon;
 	bool stateChanged;
 
 public:
