@@ -17,6 +17,7 @@ FXDEFMAP(Checklist) ChecklistMap[] = {
   FXMAPFUNC(SEL_DOUBLECLICKED, Checklist::ID_MAINLIST,
 		  Checklist::toggleItem),
   FXMAPFUNC(SEL_TIMEOUT, Checklist::ID_TIMEOUT, Checklist::remind),
+  FXMAPFUNC(SEL_CLOSE, 0, Checklist::quitApp),
 };
 
 FXIMPLEMENT(Checklist, FXMainWindow, ChecklistMap, ARRAYNUMBER(ChecklistMap));
@@ -64,19 +65,21 @@ Checklist::Checklist(FXApp *app) :
 			openIcon, this, Checklist::ID_OPENFILE);
 	new FXMenuCommand(filemenu, "&Save\tCtrl-S",
 			saveIcon, this, Checklist::ID_SAVEFILE);
+	new FXMenuSeparator(filemenu);
 	new FXMenuCommand(filemenu, "&Quit\tCtrl-Q",
 			quitchecklistIcon, this, Checklist::ID_QUIT);
 
-	new FXMenuCommand(checklistmenu, "&New\tCtrl-N",
+	new FXMenuCommand(checklistmenu, "&New Item\tCtrl-N",
 			newlistIcon, this, Checklist::ID_NEWITEM);
+	new FXMenuCommand(checklistmenu, "&Edit Item\tCtrl-E",
+			edititemIcon, this, Checklist::ID_EDITITEM);
+	new FXMenuCommand(checklistmenu, "Clear &List\tCtrl-L",
+			clearlistIcon, this, Checklist::ID_CLEARLIST);
+	new FXMenuSeparator(checklistmenu);
 	new FXMenuCommand(checklistmenu, "Mark as &Completed\tCtrl-C",
 			markcompleteIcon, this, Checklist::ID_MARKCOMPLETE);
 	new FXMenuCommand(checklistmenu, "Mark as &Incomplete\tCtrl-I",
 			markincompleteIcon, this, Checklist::ID_MARKINCOMPLETE);
-	new FXMenuCommand(checklistmenu, "Clear &List\tCtrl-L",
-			clearlistIcon, this, Checklist::ID_CLEARLIST);
-	new FXMenuCommand(checklistmenu, "&Edit Item\tCtrl-E",
-			edititemIcon, this, Checklist::ID_EDITITEM);
 
 	new FXMenuCommand(remindermenu, "New &Reminder\tCtrl-R",
 			newreminderIcon, this, Checklist::ID_NEWREMINDER);
