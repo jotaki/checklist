@@ -1,5 +1,6 @@
 #include "icons.h"
 #include "checklist.h"
+#include "reminder_dialog.h"
 
 FXDEFMAP(Checklist) ChecklistMap[] = {
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_NEWITEM, Checklist::addNewItem),
@@ -8,6 +9,7 @@ FXDEFMAP(Checklist) ChecklistMap[] = {
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_OPENFILE, Checklist::openChecklist),
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_SAVEFILE, Checklist::saveChecklist),
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_QUIT, Checklist::quitApp),
+  FXMAPFUNC(SEL_COMMAND, Checklist::ID_NEWREMINDER, Checklist::newReminder),
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_MARKCOMPLETE,
 		  Checklist::markItemComplete),
   FXMAPFUNC(SEL_COMMAND, Checklist::ID_MARKINCOMPLETE,
@@ -296,5 +298,17 @@ long Checklist::quitApp(FXObject*, FXSelector, void*)
 	if(!stateChanged || (stateChanged && removeData()))
 		getApp()->exit();
 
+	return 1;
+}
+
+long Checklist::newReminder(FXObject*, FXSelector, void*)
+{
+	ReminderDialog *dlg;
+
+	dlg = new ReminderDialog(getApp());
+	if(dlg->execute())
+		reminderlist->appendItem(dlg->getDescription());
+
+	delete dlg;
 	return 1;
 }

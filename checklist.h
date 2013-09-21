@@ -55,6 +55,7 @@ public:
 	long openChecklist(FXObject*, FXSelector, void*);
 	long saveChecklist(FXObject*, FXSelector, void*);
 	long quitApp(FXObject*, FXSelector, void*);
+	long newReminder(FXObject*, FXSelector, void*);
 };
 
 #endif	/* !CHECKLIST_H_ */
