@@ -16,5 +16,3 @@ A very simple checklist application
 
 # TODO
 * * *
-
- * Add a timer/reminder list option?
