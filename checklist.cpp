@@ -335,10 +335,15 @@ done:
 long Checklist::remind(FXObject*, FXSelector, void *data)
 {
 	FXString *str = (FXString*) data;
+	FXMessageBox *msgbox;
 
-	FXMessageBox::information(this, MBOX_OK, "Checklist Reminder",
-			"%s", str->text());
+	msgbox = new FXMessageBox(getApp(), FXString("Checklist Reminder"),
+			*str, reminderlistIcon,
+			DECOR_TITLE|DECOR_BORDER|MBOX_OK);
 
+	msgbox->execute();
+
+	delete msgbox;
 	delete str;
 	return 1;
 }
