@@ -3,6 +3,8 @@
 FXDEFMAP(ReminderDialog) ReminderDialogMap[] = {
   FXMAPFUNC(SEL_CHANGED, ReminderDialog::ID_DESCRIPTION,
 		  ReminderDialog::updateDescription),
+  FXMAPFUNC(SEL_CHANGED, ReminderDialog::ID_SLEEPTIME,
+		  ReminderDialog::updateTime),
 };
 
 FXIMPLEMENT(ReminderDialog, FXDialogBox, ReminderDialogMap,
@@ -18,7 +20,7 @@ ReminderDialog::ReminderDialog(FXApp *app) :
 	buttonFrame = new FXHorizontalFrame(mainFrame, LAYOUT_FILL_X,0,0,0,50);
 
 	new FXLabel(timeFrame, FXString("Time (in minutes):"));
-	timeField = new FXTextField(timeFrame, 4, NULL, 0,
+	timeField = new FXTextField(timeFrame, 4, this, ID_SLEEPTIME,
 			TEXTFIELD_NORMAL | TEXTFIELD_INTEGER);
 
 	new FXLabel(descrFrame, FXString("Description:"));
@@ -45,8 +47,19 @@ const FXchar *ReminderDialog::getDescription()
 	return description.text();
 }
 
+unsigned long ReminderDialog::getTime()
+{
+	return sleepTime.toUInt() * 60000000000;
+}
+
 long ReminderDialog::updateDescription(FXObject*, FXSelector, void *data)
 {
 	description.assign((FXchar*)data);
+	return 1;
+}
+
+long ReminderDialog::updateTime(FXObject*, FXSelector, void *data)
+{
+	sleepTime.assign((FXchar*)data);
 	return 1;
 }
