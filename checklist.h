@@ -22,6 +22,8 @@ public:
 		ID_OPENFILE,
 		ID_SAVEFILE,
 		ID_QUIT,
+		ID_REMINDERLIST,
+		ID_NEWREMINDER,
 
 		ID_LAST
 	};
@@ -32,8 +34,9 @@ protected:
 
 private:
 	FXMenuBar *menubar;
-	FXMenuPane *filemenu, *editmenu;
-	FXList *list;
+	FXMenuPane *filemenu, *checklistmenu, *remindermenu;
+	FXList *checklist, *reminderlist;
+	FXTabBook *tab;
 	FXPNGIcon *completeIcon, *incompleteIcon,
 		  *newlistIcon, *clearlistIcon,
 		  *edititemIcon, *markcompleteIcon,

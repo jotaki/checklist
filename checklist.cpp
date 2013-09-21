@@ -23,9 +23,17 @@ Checklist::Checklist(FXApp *app) :
 {
 	menubar = new FXMenuBar(this, LAYOUT_SIDE_TOP | LAYOUT_FILL_X);
 	filemenu = new FXMenuPane(this);
-	editmenu = new FXMenuPane(this);
+	checklistmenu = new FXMenuPane(this);
+	remindermenu = new FXMenuPane(this);
+	tab = new FXTabBook(this, NULL, 0, TABBOOK_BOTTOMTABS |
+			LAYOUT_FILL_X | LAYOUT_FILL_Y);
 
-	list = new FXList(this, this, ID_MAINLIST,
+	new FXTabItem(tab, "Checklist");
+	checklist = new FXList(tab, this, ID_MAINLIST,
+			LAYOUT_FILL_Y | LAYOUT_FILL_X);
+
+	new FXTabItem(tab, "Reminders");
+	reminderlist = new FXList(tab, this, ID_REMINDERLIST,
 			LAYOUT_FILL_Y | LAYOUT_FILL_X);
 
 	completeIcon = new FXPNGIcon(getApp(), complete);
@@ -49,24 +57,29 @@ Checklist::Checklist(FXApp *app) :
 			saveIcon, this, Checklist::ID_SAVEFILE);
 	new FXMenuCommand(filemenu, "&Quit\tCtrl-Q",
 			quitchecklistIcon, this, Checklist::ID_QUIT);
-	new FXMenuCommand(editmenu, "&New\tCtrl-N",
+
+	new FXMenuCommand(checklistmenu, "&New\tCtrl-N",
 			newlistIcon, this, Checklist::ID_NEWITEM);
-	new FXMenuCommand(editmenu, "Mark as &Completed\tCtrl-C",
+	new FXMenuCommand(checklistmenu, "Mark as &Completed\tCtrl-C",
 			markcompleteIcon, this, Checklist::ID_MARKCOMPLETE);
-	new FXMenuCommand(editmenu, "Mark as &Incomplete\tCtrl-I",
+	new FXMenuCommand(checklistmenu, "Mark as &Incomplete\tCtrl-I",
 			markincompleteIcon, this, Checklist::ID_MARKINCOMPLETE);
-	new FXMenuCommand(editmenu, "Clear &List\tCtrl-L",
+	new FXMenuCommand(checklistmenu, "Clear &List\tCtrl-L",
 			clearlistIcon, this, Checklist::ID_CLEARLIST);
-	new FXMenuCommand(editmenu, "&Edit Item\tCtrl-E",
+	new FXMenuCommand(checklistmenu, "&Edit Item\tCtrl-E",
 			edititemIcon, this, Checklist::ID_EDITITEM);
 
+	new FXMenuCommand(remindermenu, "New &Reminder\tCtrl-R",
+			NULL, this, Checklist::ID_NEWREMINDER);
+
 	new FXMenuTitle(menubar, "&File", NULL, filemenu);
-	new FXMenuTitle(menubar, "&Edit", NULL, editmenu);
+	new FXMenuTitle(menubar, "&Checklist", NULL, checklistmenu);
+	new FXMenuTitle(menubar, "&Reminders", NULL, remindermenu);
 }
 
 Checklist::~Checklist()
 {
-	delete editmenu;
+	delete checklistmenu;
 	delete filemenu;
 	delete menubar;
 	delete completeIcon;
@@ -88,7 +101,8 @@ long Checklist::addNewItem(FXObject*, FXSelector, void*)
 
 	if(FXInputDialog::getString(item, this, "Check List",
 			"Add New Checklist Item")) {
-		list->appendItem(item.text(), incompleteIcon, (void*)(FXival)0);
+		checklist->appendItem(item.text(),
+				incompleteIcon, (void*)(FXival)0);
 		stateChanged = true;
 	}
 	return 1;
@@ -96,16 +110,16 @@ long Checklist::addNewItem(FXObject*, FXSelector, void*)
 
 long Checklist::clearItems(FXObject*, FXSelector, void*)
 {
-	list->clearItems();
+	checklist->clearItems();
 	return 1;
 }
 
 long Checklist::markItemComplete(FXObject*, FXSelector, void*)
 {
-	int item = list->getCurrentItem();
+	int item = checklist->getCurrentItem();
 	if(item >= 0) {
-		list->setItemIcon(item, completeIcon);
-		list->setItemData(item, (void*)(FXival)1);
+		checklist->setItemIcon(item, completeIcon);
+		checklist->setItemData(item, (void*)(FXival)1);
 		stateChanged = true;
 	}
 	return 1;
@@ -113,10 +127,10 @@ long Checklist::markItemComplete(FXObject*, FXSelector, void*)
 
 long Checklist::markItemIncomplete(FXObject*, FXSelector, void*)
 {
-	int item = list->getCurrentItem();
+	int item = checklist->getCurrentItem();
 	if(item >= 0) {
-		list->setItemIcon(item, incompleteIcon);
-		list->setItemData(item, (void*)(FXival)0);
+		checklist->setItemIcon(item, incompleteIcon);
+		checklist->setItemData(item, (void*)(FXival)0);
 		stateChanged = true;
 	}
 	return 1;
@@ -124,9 +138,9 @@ long Checklist::markItemIncomplete(FXObject*, FXSelector, void*)
 
 long Checklist::toggleItem(FXObject *obj, FXSelector sel, void *ptr)
 {
-	int item = list->getCurrentItem();
+	int item = checklist->getCurrentItem();
 	if(item >= 0) {
-		if(list->getItemData(item)) {
+		if(checklist->getItemData(item)) {
 			markItemIncomplete(obj, sel, ptr);
 		} else {
 			markItemComplete(obj, sel, ptr);
@@ -140,14 +154,14 @@ long Checklist::editItem(FXObject*, FXSelector, void*)
 	FXString item;
 	int item_i;
 
-	item_i = list->getCurrentItem();
+	item_i = checklist->getCurrentItem();
 	if(item_i < 0)
 		return 1;
 
-	item = list->getItemText(item_i);
+	item = checklist->getItemText(item_i);
 	if(FXInputDialog::getString(item, this, "Check List",
 			"Edit Checklist Item")) {
-		list->setItemText(item_i, item.text());
+		checklist->setItemText(item_i, item.text());
 		stateChanged = true;
 	}
 
@@ -176,7 +190,7 @@ long Checklist::openChecklist(FXObject*, FXSelector, void*)
 		return 1;
 	}
 
-	list->clearItems();
+	checklist->clearItems();
 	while(!stream.eof()) {
 		stream >> type;
 		stream >> checked;
@@ -190,7 +204,7 @@ long Checklist::openChecklist(FXObject*, FXSelector, void*)
 		} while(!stream.eof());
 
 		if(!item.empty()) {
-			list->appendItem(item, checked?
+			checklist->appendItem(item, checked?
 					completeIcon : incompleteIcon,
 					(void*)(FXival) checked);
 		}
@@ -229,11 +243,11 @@ long Checklist::saveChecklist(FXObject*, FXSelector, void*)
 		return 1;
 	}
 
-	for(i = 0; i < list->getNumItems(); ++i) {
+	for(i = 0; i < checklist->getNumItems(); ++i) {
 		stream << 'C';
-		stream << (FXchar) ((FXival)list->getItemData(i) + '0');
+		stream << (FXchar) ((FXival)checklist->getItemData(i) + '0');
 
-		str = list->getItemText(i);
+		str = checklist->getItemText(i);
 		stream.save(str.text(), str.length());
 		stream << '\n';
 	}
