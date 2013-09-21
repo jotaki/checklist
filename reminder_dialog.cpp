@@ -5,6 +5,10 @@ FXDEFMAP(ReminderDialog) ReminderDialogMap[] = {
 		  ReminderDialog::updateDescription),
   FXMAPFUNC(SEL_CHANGED, ReminderDialog::ID_SLEEPTIME,
 		  ReminderDialog::updateTime),
+  FXMAPFUNC(SEL_COMMAND, ReminderDialog::ID_SLEEPTIME,
+		  ReminderDialog::changeFocus),
+  FXMAPFUNC(SEL_COMMAND, ReminderDialog::ID_DESCRIPTION,
+		  ReminderDialog::onCmdAccept),
 };
 
 FXIMPLEMENT(ReminderDialog, FXDialogBox, ReminderDialogMap,
@@ -42,6 +46,12 @@ ReminderDialog::~ReminderDialog()
 	delete mainFrame;
 }
 
+void ReminderDialog::create()
+{
+	FXDialogBox::create();
+	timeField->setFocus();
+}
+
 const FXchar *ReminderDialog::getDescription()
 {
 	return description.text();
@@ -61,5 +71,11 @@ long ReminderDialog::updateDescription(FXObject*, FXSelector, void *data)
 long ReminderDialog::updateTime(FXObject*, FXSelector, void *data)
 {
 	sleepTime.assign((FXchar*)data);
+	return 1;
+}
+
+long ReminderDialog::changeFocus(FXObject*, FXSelector, void *)
+{
+	descrField->setFocus();
 	return 1;
 }

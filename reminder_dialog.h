@@ -10,6 +10,7 @@ class ReminderDialog : public FXDialogBox
 public:
 	ReminderDialog(FXApp *app);
 	virtual ~ReminderDialog();
+	virtual void create();
 	
 	enum {
 		ID_DESCRIPTION = FXDialogBox::ID_LAST,
@@ -32,6 +33,7 @@ public:
 
 	long updateDescription(FXObject *, FXSelector, void*);
 	long updateTime(FXObject *, FXSelector, void*);
+	long changeFocus(FXObject *, FXSelector, void*);
 };
 
 #endif	/* !REMINDER_DIALOG_H_ */
