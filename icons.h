@@ -39,6 +39,9 @@ extern const unsigned char quitchecklist[];
 /* created by reswrap from file icons/remindericon.png */
 extern const unsigned char remindericon[];
 
+/* created by reswrap from file icons/reminder.png */
+extern const unsigned char reminder[];
+
 /* created by reswrap from file icons/saveckl.png */
 extern const unsigned char saveckl[];
 
