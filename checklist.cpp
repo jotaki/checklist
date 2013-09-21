@@ -16,6 +16,7 @@ FXDEFMAP(Checklist) ChecklistMap[] = {
 		  Checklist::markItemIncomplete),
   FXMAPFUNC(SEL_DOUBLECLICKED, Checklist::ID_MAINLIST,
 		  Checklist::toggleItem),
+  FXMAPFUNC(SEL_TIMEOUT, Checklist::ID_TIMEOUT, Checklist::remind),
 };
 
 FXIMPLEMENT(Checklist, FXMainWindow, ChecklistMap, ARRAYNUMBER(ChecklistMap));
@@ -44,6 +45,7 @@ Checklist::Checklist(FXApp *app) :
 	mainIconSm = new FXPNGIcon(getApp(), mainiconsm);
 	reminderIcon = new FXPNGIcon(getApp(), remindericon);
 	newreminderIcon = new FXPNGIcon(getApp(), newreminder);
+	reminderlistIcon = new FXPNGIcon(getApp(), reminder);
 
 	new FXTabItem(tab, "Checklist", markcompleteIcon);
 	checklist = new FXList(tab, this, ID_MAINLIST,
@@ -105,6 +107,7 @@ Checklist::~Checklist()
 	delete mainIconSm;
 	delete reminderIcon;
 	delete newreminderIcon;
+	delete reminderlistIcon;
 
 	delete checklist;
 	delete reminderlist;
@@ -115,6 +118,7 @@ void Checklist::create()
 {
 	completeIcon->create();
 	incompleteIcon->create();
+	reminderlistIcon->create();
 	FXMainWindow::create();
 
 	show(PLACEMENT_SCREEN);
@@ -306,9 +310,32 @@ long Checklist::newReminder(FXObject*, FXSelector, void*)
 	ReminderDialog *dlg;
 
 	dlg = new ReminderDialog(getApp());
-	if(dlg->execute())
-		reminderlist->appendItem(dlg->getDescription());
+	if(dlg->execute()) {
+		if(dlg->getTime() == 0) {
+			FXMessageBox::error(this, MBOX_OK, "Invalid time",
+					"Invalid sleep time entered. (%lu)",
+					dlg->getTime());
+			goto done;
+		}
+		reminderlist->appendItem(dlg->getDescription(),
+				reminderlistIcon);
 
+		getApp()->addTimeout(this, ID_TIMEOUT, dlg->getTime(),
+				new FXString(dlg->getDescription()));
+	}
+
+done:
 	delete dlg;
+	return 1;
+}
+
+long Checklist::remind(FXObject*, FXSelector, void *data)
+{
+	FXString *str = (FXString*) data;
+
+	FXMessageBox::information(this, MBOX_OK, "Checklist Reminder",
+			"%s", str->text());
+
+	delete str;
 	return 1;
 }

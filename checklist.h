@@ -24,6 +24,7 @@ public:
 		ID_QUIT,
 		ID_REMINDERLIST,
 		ID_NEWREMINDER,
+		ID_TIMEOUT,
 
 		ID_LAST
 	};
@@ -42,7 +43,8 @@ private:
 		  *edititemIcon, *markcompleteIcon,
 		  *markincompleteIcon, *quitchecklistIcon,
 		  *openIcon, *saveIcon, *mainIcon, *mainIconSm,
-		  *reminderIcon, *newreminderIcon;
+		  *reminderIcon, *newreminderIcon,
+		  *reminderlistIcon;
 	bool stateChanged;
 
 public:
@@ -56,6 +58,7 @@ public:
 	long saveChecklist(FXObject*, FXSelector, void*);
 	long quitApp(FXObject*, FXSelector, void*);
 	long newReminder(FXObject*, FXSelector, void*);
+	long remind(FXObject*, FXSelector, void*);
 };
 
 #endif	/* !CHECKLIST_H_ */
