@@ -235,7 +235,7 @@ long Checklist::openChecklist(FXObject*, FXSelector, void*)
 			item.append(tmp);
 		} while(!stream.eof());
 
-		if(!item.empty()) {
+		if(!item.empty() && type == 'C') {
 			checklist->appendItem(item, checked?
 					completeIcon : incompleteIcon,
 					(void*)(FXival) checked);
